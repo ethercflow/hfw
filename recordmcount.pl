@@ -542,6 +542,18 @@ close(FILE);
 #
 # Step 3: Compile the file that holds the list of call sites to mcount.
 #
+open(my $fh, '<:encoding(UTF-8)', $mcount_s)
+  or die "Could not open file '$mcount_s' $!";
+
+while (my $row = <$fh>) {
+  chomp $row;
+  print "$row\n";
+}
+
+close($fh);
+
+print "$cc -o $mcount_o -c $mcount_s\n";
+
 `$cc -o $mcount_o -c $mcount_s`;
 
 my @converts = keys %convert;
@@ -564,19 +576,23 @@ if ($#converts >= 0) {
     #
     # Step 5: set up each local function as a global
     #
+    print "$objcopy $globallist $inputfile $globalobj";
     `$objcopy $globallist $inputfile $globalobj`;
 
     #
     # Step 6: Link the global version to our list.
     #
+    print "$ld -r $globalobj $mcount_o -o $globalmix\n";
     `$ld -r $globalobj $mcount_o -o $globalmix`;
 
     #
     # Step 7: Convert the local functions back into local symbols
     #
+    print "$objcopy $locallist $globalmix $inputfile\n";
     `$objcopy $locallist $globalmix $inputfile`;
 
     # Remove the temp files
+    print "$rm $globalobj $globalmix\n\n\n";
     `$rm $globalobj $globalmix`;
 
 } else {
@@ -586,11 +602,13 @@ if ($#converts >= 0) {
     #
     # Step 8: Link the object with our list of call sites object.
     #
+    print "$ld -r $inputfile $mcount_o -o $mix\n";
     `$ld -r $inputfile $mcount_o -o $mix`;
 
     #
     # Step 9: Move the result back to the original object.
     #
+    print "$mv $mix $inputfile\n\n\n";
     `$mv $mix $inputfile`;
 }
 

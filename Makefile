@@ -10,11 +10,11 @@ LDFLAGS =   -Thfw.lds
 all: hfw 
 
 hfw: $(obj)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	@$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-	@./recordmcount.pl "x86_64" ""  "64" "objdump" "objcopy" "cc" "ld" "nm" "" "" "0" $@ > /dev/null 2>&1
+	@$(CC) $(CFLAGS) -o $@ -c $<
+	@./recordmcount.pl "x86_64" ""  "64" "objdump" "objcopy" "cc" "ld" "nm" "" "" "0" $@ >> ./recordmcount.log 2>&1
 
 clean:
-	rm -f $(obj) hfw 
+	@rm -f $(obj) hfw *.log
